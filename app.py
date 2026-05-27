@@ -2,19 +2,49 @@ import streamlit as st
 import pickle
 import numpy as np
 
-# loading model
-model = pickle.load(
-    open("models/dtr_model.pkl", "rb")
+# loading saved models
+
+pre_model = pickle.load(
+
+    open(
+        "models/prepruning_model.pkl",
+        "rb"
+    )
+)
+
+post_model = pickle.load(
+
+    open(
+        "models/postpruning_model.pkl",
+        "rb"
+    )
 )
 
 st.set_page_config(
+
     page_title="Car Price Prediction",
+
     layout="centered"
 )
 
-st.title("Car Price Prediction using Decision Tree Regressor")
+st.title(
+    "Car Price Prediction using Decision Tree Regressor"
+)
 
-st.write("Enter car details below")
+# selecting pruning method
+
+model_choice = st.selectbox(
+
+    "Choose Model",
+
+    [
+        "Pre Pruning",
+
+        "Post Pruning"
+    ]
+)
+
+# user inputs
 
 symboling = st.slider(
     "Symboling",
@@ -66,44 +96,67 @@ highwaympg = st.slider(
     30
 )
 
+enginesize = st.slider(
+    "Engine Size",
+    50,
+    350,
+    120
+)
+
+curbweight = st.slider(
+    "Curb Weight",
+    1000,
+    5000,
+    2500
+)
+
+wheelbase = st.slider(
+    "Wheel Base",
+    80,
+    130,
+    100
+)
+
+# encoding categorical inputs
+
 fueltype = 1 if fueltype == "gas" else 0
 
 aspiration = 1 if aspiration == "turbo" else 0
 
 doornumber = 1 if doornumber == "two" else 0
 
+# creating input array
+
 input_data = np.array([[
     symboling,
     fueltype,
     aspiration,
     doornumber,
-    2,
-    1,
-    100,
-    150,
-    64,
-    5200,
-    4,
     horsepower,
     peakrpm,
     citympg,
     highwaympg,
-    2,
-    120,
-    95,
-    50,
-    20,
-    30,
-    1500,
-    1
+    enginesize,
+    curbweight,
+    wheelbase
 ]])
 
 if st.button("Predict Price"):
 
-    prediction = model.predict(
-        input_data
-    )
+    # selecting model
+
+    if model_choice == "Pre Pruning":
+
+        prediction = pre_model.predict(
+            input_data
+        )
+
+    else:
+
+        prediction = post_model.predict(
+            input_data
+        )
 
     st.success(
-        f"Predicted Car Price: ₹ {prediction[0]:,.2f}"
+        f"Predicted Car Price : ₹ {prediction[0]:,.2f}"
     )
